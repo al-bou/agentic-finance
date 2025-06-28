@@ -40,5 +40,7 @@ conda env create -f environment.yml
 conda activate agentic-finance
 ````
 
+![CI](https://github.com/al-bou/agentic-finance/actions/workflows/ci.yml/badge.svg)
+
 📜 License
 MIT
