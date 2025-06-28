@@ -33,5 +33,12 @@ python agents/price_agent.py
 📹 Follow the YouTube series
 ➡ [YouTube channel](https://www.youtube.com/channel/UCQiHRJlmZrxg0AaEvwJpMNg/)
 
+## ⚙️ Conda environment setup (optional but recommended)
+
+```bash
+conda env create -f environment.yml
+conda activate agentic-finance
+````
+
 📜 License
 MIT

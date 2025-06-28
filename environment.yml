@@ -8,9 +8,11 @@ dependencies:
   - matplotlib
   - pandas
   - requests
+  - python-dotenv
   - pip
   - pip:
       - streamlit
       - openai
       - beautifulsoup4
       - PyPDF2
+
