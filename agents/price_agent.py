@@ -87,8 +87,6 @@ def compute_deltas(data: pd.DataFrame) -> pd.DataFrame:
 def check_alert_enriched(data: pd.DataFrame, static_oc=5.0, static_hl=7.0, dynamic_window=3, std_multiplier=2.0) -> bool:
     """
     Check for alert based on static thresholds and dynamic thresholds.
-
-    Returns True if alert triggered.
     """
     if data is None or data.empty:
         print("[ERROR] No data to evaluate alert.")
@@ -102,6 +100,7 @@ def check_alert_enriched(data: pd.DataFrame, static_oc=5.0, static_hl=7.0, dynam
     print(f"[INFO] Latest Delta_OC: {latest_oc:.2f}%")
     print(f"[INFO] Latest Delta_HL: {latest_hl:.2f}%")
 
+    # Static checks
     if abs(latest_oc) >= static_oc:
         print(f"[ALERT] Static OC threshold exceeded ({static_oc}%)")
         return True
@@ -109,6 +108,7 @@ def check_alert_enriched(data: pd.DataFrame, static_oc=5.0, static_hl=7.0, dynam
         print(f"[ALERT] Static HL threshold exceeded ({static_hl}%)")
         return True
 
+    # Dynamic checks
     if len(data) > dynamic_window:
         oc_hist = data['Delta_OC'].iloc[-dynamic_window-1:-1]
         hl_hist = data['Delta_HL'].iloc[-dynamic_window-1:-1]
@@ -121,17 +121,18 @@ def check_alert_enriched(data: pd.DataFrame, static_oc=5.0, static_hl=7.0, dynam
         print(f"[INFO] OC dynamic baseline: mean={oc_mean:.2f}%, std={oc_std:.2f}%")
         print(f"[INFO] HL dynamic baseline: mean={hl_mean:.2f}%, std={hl_std:.2f}%")
 
-        if abs(latest_oc - oc_mean) > std_multiplier * oc_std:
-            print(f"[ALERT] Dynamic OC anomaly detected (> {std_multiplier} std devs)")
+        if (latest_oc - oc_mean) > std_multiplier * oc_std:
+            print(f"[ALERT] Dynamic OC anomaly detected (> {std_multiplier} std devs above mean)")
             return True
-        if abs(latest_hl - hl_mean) > std_multiplier * hl_std:
-            print(f"[ALERT] Dynamic HL anomaly detected (> {std_multiplier} std devs)")
+        if (latest_hl - hl_mean) > std_multiplier * hl_std:
+            print(f"[ALERT] Dynamic HL anomaly detected (> {std_multiplier} std devs above mean)")
             return True
     else:
         print("[INFO] Not enough data for dynamic threshold evaluation.")
 
     print("[INFO] No alert triggered.")
     return False
+
 
 if __name__ == "__main__":
     TICKER = "AAPL"
