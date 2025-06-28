@@ -17,15 +17,18 @@ This project serves as the foundation for a YouTube series on building an AI-aug
 ```bash
 git clone https://github.com/al-bou/agentic-finance.git
 cd agentic-finance
+````
 
 2 Install dependencies:
 ```python
 pip install -r requirements.txt
+````
 
 3 Run a basic agent:
 
 ```bash
 python agents/price_agent.py
+````
 
 📹 Follow the YouTube series
 ➡ [YouTube channel](https://www.youtube.com/channel/UCQiHRJlmZrxg0AaEvwJpMNg/)
