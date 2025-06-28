@@ -71,6 +71,10 @@ def fetch_price_with_fallback(ticker: str) -> pd.DataFrame:
     """
     data = fetch_price_yfinance(ticker)
     if data is not None:
+        if len(data) == 1:
+            from datetime import datetime
+            data = data.copy()
+            data.index = [datetime.now()]  # or datetime.today(), or a timestamp from API
         return data
     print("[INFO] Falling back to Finnhub...")
     return fetch_price_finnhub(ticker)
@@ -143,3 +147,4 @@ if __name__ == "__main__":
         print(data.tail())
     else:
         print("[ERROR] No data fetched from any source.")
+    

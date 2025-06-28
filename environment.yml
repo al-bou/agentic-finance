@@ -9,6 +9,7 @@ dependencies:
   - pandas
   - requests
   - python-dotenv
+  - plotly
   - pip
   - pip:
       - streamlit
