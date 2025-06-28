@@ -1,0 +1,16 @@
+name: agentic-finance
+channels:
+  - defaults
+  - conda-forge
+dependencies:
+  - python=3.11
+  - yfinance
+  - matplotlib
+  - pandas
+  - requests
+  - pip
+  - pip:
+      - streamlit
+      - openai
+      - beautifulsoup4
+      - PyPDF2
