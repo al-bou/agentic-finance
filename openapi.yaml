@@ -1,0 +1,109 @@
+openapi: 3.0.0
+info:
+  title: Agentic Finance Orchestrator API
+  version: 1.0.0
+  description: >
+    API for Agentic Finance MVP. Provides endpoints to trigger the Price Agent and to retrieve logged results.
+
+servers:
+  - url: http://localhost:8000
+    description: Local development server
+
+paths:
+  /price:
+    get:
+      summary: Trigger the Price Agent and get structured result
+      parameters:
+        - name: ticker
+          in: query
+          description: Stock ticker symbol (default: AAPL)
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Structured result from the Price Agent
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ticker:
+                    type: string
+                  timestamp:
+                    type: string
+                  alert:
+                    type: boolean
+                  metrics:
+                    type: object
+                    properties:
+                      delta_oc:
+                        type: number
+                      delta_hl:
+                        type: number
+                  details:
+                    type: object
+                    properties:
+                      static_oc_threshold:
+                        type: number
+                      static_hl_threshold:
+                        type: number
+                      dynamic_window:
+                        type: integer
+                      std_multiplier:
+                        type: number
+
+  /price_logs:
+    get:
+      summary: Retrieve logged Price Agent results
+      parameters:
+        - name: alert
+          in: query
+          description: Filter by alert status (1 = alert, 0 = no alert)
+          required: false
+          schema:
+            type: integer
+        - name: ticker
+          in: query
+          description: Filter by ticker symbol
+          required: false
+          schema:
+            type: string
+        - name: limit
+          in: query
+          description: Limit the number of returned results (default: 10)
+          required: false
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of logged Price Agent results
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                    ticker:
+                      type: string
+                    timestamp:
+                      type: string
+                    alert:
+                      type: integer
+                    delta_oc:
+                      type: number
+                      nullable: true
+                    delta_hl:
+                      type: number
+                      nullable: true
+                    static_oc_threshold:
+                      type: number
+                    static_hl_threshold:
+                      type: number
+                    dynamic_window:
+                      type: integer
+                    std_multiplier:
+                      type: number
