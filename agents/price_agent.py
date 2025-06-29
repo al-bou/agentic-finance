@@ -11,6 +11,10 @@ import requests
 import time
 from dotenv import load_dotenv
 import os
+from datetime import datetime
+import json
+
+
 
 # Load API key
 load_dotenv()
@@ -138,13 +142,38 @@ def check_alert_enriched(data: pd.DataFrame, static_oc=5.0, static_hl=7.0, dynam
     return False
 
 
+
 if __name__ == "__main__":
     TICKER = "AAPL"
     data = fetch_price_with_fallback(TICKER)
+    output = {
+        "ticker": TICKER,
+        "timestamp": datetime.utcnow().isoformat() + "Z",
+        "alert": False,
+        "metrics": {},
+        "details": {
+            "static_oc_threshold": 5.0,
+            "static_hl_threshold": 7.0,
+            "dynamic_window": 3,
+            "std_multiplier": 2.0
+        }
+    }
+
     if data is not None:
+        data = compute_deltas(data)
         alert = check_alert_enriched(data)
-        print(f"[RESULT] Alert triggered: {alert}")
-        print(data.tail())
+        output["alert"] = alert
+
+        latest_row = data.iloc[-1]
+        output["metrics"] = {
+            "delta_oc": float(latest_row.get("Delta_OC", float("nan"))),
+            "delta_hl": float(latest_row.get("Delta_HL", float("nan")))
+        }
+
     else:
         print("[ERROR] No data fetched from any source.")
+
+    # Final structured output
+    print(json.dumps(output, indent=2))
+
     

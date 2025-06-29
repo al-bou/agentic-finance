@@ -10,6 +10,8 @@ dependencies:
   - requests
   - python-dotenv
   - plotly
+  - fastapi
+  - uvicorn
   - pip
   - pip:
       - streamlit

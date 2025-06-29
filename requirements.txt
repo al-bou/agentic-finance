@@ -8,3 +8,5 @@ requests
 PyPDF2
 python-dotenv
 plotly
+fastapi
+uvicorn
