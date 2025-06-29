@@ -50,3 +50,28 @@ def log_price_result(result: dict):
     ))
     conn.commit()
     conn.close()
+
+def get_recent_logs(ticker: str, limit: int = 5) -> list:
+    """
+    Retrieve recent price logs for a given ticker from the database.
+    """
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute(
+        """
+        SELECT timestamp, alert, delta_oc, delta_hl
+        FROM price_logs
+        WHERE ticker = ?
+        ORDER BY id DESC
+        LIMIT ?
+        """,
+        (ticker.upper(), limit)
+    )
+    rows = cursor.fetchall()
+    conn.close()
+
+    # Format as list of dicts
+    return [
+        {"timestamp": r[0], "alert": r[1], "delta_oc": r[2], "delta_hl": r[3]}
+        for r in rows
+    ]

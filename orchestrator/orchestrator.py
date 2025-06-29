@@ -2,12 +2,12 @@ from fastapi import FastAPI
 from agents.price_agent import fetch_price_with_fallback, compute_deltas, check_alert_enriched
 from datetime import datetime
 import pandas as pd
-from orchestrator.db_utils import init_db, log_price_result
+from orchestrator.db_utils import init_db, log_price_result, get_recent_logs
 import os
 import sqlite3
 from fastapi import Query
 from typing import Optional
-from orchestrator.ai_utils import generate_price_comment
+from orchestrator.ai_utils import generate_price_comment, generate_investment_decision
 
 
 DB_PATH = os.path.join("db", "agentic.db")
@@ -48,6 +48,10 @@ def price_agent(ticker: str = "AAPL"):
     log_price_result(output)
     comment = generate_price_comment(output)
     output["ia_comment"] = comment
+    history = get_recent_logs(ticker)
+    decision = generate_investment_decision(output, history)
+    output["ia_decision"] = decision
+
     return output
 
 @app.get("/price_logs")
