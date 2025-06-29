@@ -3,9 +3,12 @@ from agents.price_agent import fetch_price_with_fallback, compute_deltas, check_
 from datetime import datetime
 import pandas as pd
 from orchestrator.db_utils import init_db, log_price_result
-
-
+import os
 import sqlite3
+from fastapi import Query
+from typing import Optional
+
+DB_PATH = os.path.join("db", "agentic.db")
 
 app = FastAPI()
 
@@ -42,3 +45,39 @@ def price_agent(ticker: str = "AAPL"):
         }
     log_price_result(output)
     return output
+
+@app.get("/price_logs")
+def get_price_logs(
+    alert: Optional[int] = Query(None, description="Filter by alert status (1 or 0)"),
+    ticker: Optional[str] = Query(None, description="Filter by ticker symbol"),
+    limit: int = Query(10, description="Limit number of results (default 10)")
+):
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+
+    query = "SELECT * FROM price_logs"
+    conditions = []
+    params = []
+
+    if alert is not None:
+        conditions.append("alert = ?")
+        params.append(alert)
+    if ticker is not None:
+        conditions.append("ticker = ?")
+        params.append(ticker.upper())
+
+    if conditions:
+        query += " WHERE " + " AND ".join(conditions)
+
+    query += " ORDER BY id DESC LIMIT ?"
+    params.append(limit)
+
+    cursor.execute(query, tuple(params))
+    columns = [col[0] for col in cursor.description]
+    rows = cursor.fetchall()
+
+    conn.close()
+
+    # Convert to list of dicts
+    results = [dict(zip(columns, row)) for row in rows]
+    return results
