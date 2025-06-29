@@ -7,6 +7,8 @@ import os
 import sqlite3
 from fastapi import Query
 from typing import Optional
+from orchestrator.ai_utils import generate_price_comment
+
 
 DB_PATH = os.path.join("db", "agentic.db")
 
@@ -44,6 +46,8 @@ def price_agent(ticker: str = "AAPL"):
             "delta_hl": float(latest_row.get("Delta_HL", float("nan")))
         }
     log_price_result(output)
+    comment = generate_price_comment(output)
+    output["ia_comment"] = comment
     return output
 
 @app.get("/price_logs")
