@@ -75,3 +75,29 @@ def get_recent_logs(ticker: str, limit: int = 5) -> list:
         {"timestamp": r[0], "alert": r[1], "delta_oc": r[2], "delta_hl": r[3]}
         for r in rows
     ]
+
+def compute_history_stats(history: list) -> dict:
+    """
+    Compute basic stats from recent history (mean, std, alert count).
+    """
+    import numpy as np
+
+    if not history:
+        return {
+            "mean_delta_oc": None,
+            "std_delta_oc": None,
+            "mean_delta_hl": None,
+            "std_delta_hl": None,
+            "alert_count": 0
+        }
+
+    delta_oc = [h['delta_oc'] for h in history if h['delta_oc'] is not None]
+    delta_hl = [h['delta_hl'] for h in history if h['delta_hl'] is not None]
+
+    return {
+        "mean_delta_oc": float(np.mean(delta_oc)) if delta_oc else None,
+        "std_delta_oc": float(np.std(delta_oc)) if delta_oc else None,
+        "mean_delta_hl": float(np.mean(delta_hl)) if delta_hl else None,
+        "std_delta_hl": float(np.std(delta_hl)) if delta_hl else None,
+        "alert_count": sum(h['alert'] for h in history)
+    }

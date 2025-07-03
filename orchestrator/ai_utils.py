@@ -32,28 +32,41 @@ def generate_price_comment(result: dict) -> str:
     except Exception as e:
         return f"⚠ Error generating AI comment: {str(e)}"
 
-def generate_investment_decision(result: dict, history: list) -> str:
+def generate_investment_decision(result: dict, stats: dict, trend: dict, news: str = ...) -> str:
     """
-    Generate an investment decision using OpenAI based on the current result and history.
+    Generate an investment decision with 52-week context.
     """
     if not openai.api_key:
         return "⚠ No OpenAI API key configured."
 
-    history_text = "\n".join([
-        f"{h['timestamp']}: alert={h['alert']}, delta_oc={h['delta_oc']}%, delta_hl={h['delta_hl']}%"
-        for h in history
-    ])
+    trend_text = ""
 
+    for period in ["5d", "30d", "90d", "180d", "365d"]:
+        trend_text += (
+            f"{period} => "
+            f"mean_delta_oc={trend.get(f'mean_delta_oc_{period}', 'N/A')}%, "
+            f"mean_delta_hl={trend.get(f'mean_delta_hl_{period}', 'N/A')}%, "
+            f"mean_close={trend.get(f'mean_close_{period}', 'N/A')}, "
+            f"close_slope={trend.get(f'close_slope_{period}', 'N/A')}\n"
+        )
+
+    # Exemple d'assemblage final dans le prompt
     prompt = (
+        f"You are a financial analyst advising a trader.\n"
         f"Stock: {result['ticker']}\n"
         f"Current metrics: delta_oc={result['metrics'].get('delta_oc', 'N/A')}%, "
         f"delta_hl={result['metrics'].get('delta_hl', 'N/A')}%\n"
-        f"Alert status: {'TRIGGERED' if result['alert'] else 'not triggered'}\n\n"
-        f"Recent history:\n{history_text}\n\n"
-        f"Based on this information, advise a decision: buy, hold, or sell. "
-        f"Explain the reasoning in one paragraph. Return JSON in this format: "
-        f'{{"decision": "...", "confidence": 0.0, "reasoning": "..."}}'
+        f"Alert status: {'TRIGGERED' if result['alert'] else 'not triggered'}\n"
+        f"52-week stats: mean_delta_oc={stats.get('mean_delta_oc', 'N/A')}%, std_delta_oc={stats.get('std_delta_oc', 'N/A')}%, "
+        f"90th_delta_oc={stats.get('90th_delta_oc', 'N/A')}%, mean_delta_hl={stats.get('mean_delta_hl', 'N/A')}%, "
+        f"std_delta_hl={stats.get('std_delta_hl', 'N/A')}%, 90th_delta_hl={stats.get('90th_delta_hl', 'N/A')}%\n"
+        f"Trend indicators:\n{trend_text}"
+        f"News context: {news}\n"
+        f"Based on this information, advise buy, hold, or sell. "
+        f"Explain reasoning. Return JSON: "
+        f'{{"decision": "...", "confidence": 0.0, "reasoning": "...", "key_factors": ["...", "..."]}}'
     )
+
 
     try:
         response = openai.chat.completions.create(
@@ -62,8 +75,10 @@ def generate_investment_decision(result: dict, history: list) -> str:
                 {"role": "system", "content": "You are a financial analyst bot."},
                 {"role": "user", "content": prompt}
             ],
-            max_tokens=200
+            max_tokens=300
         )
         return response.choices[0].message.content.strip()
     except Exception as e:
         return f"⚠ Error generating decision: {str(e)}"
+
+

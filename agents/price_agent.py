@@ -73,7 +73,7 @@ def fetch_price_with_fallback(ticker: str) -> pd.DataFrame:
     """
     Fetch price data using yfinance with Finnhub as fallback.
     """
-    data = fetch_price_yfinance(ticker)
+    data = fetch_price_yfinance(ticker, period="1y", interval="1d")
     if data is not None:
         if len(data) == 1:
             from datetime import datetime
